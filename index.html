@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>214 班級幹部工作表現評量表</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .description {
+      text-align: center;
+      color: #555;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+
+    form {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      border-left: 4px solid #1976d2;
+      padding-left: 8px;
+    }
+
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      color: #333;
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      font-size: 0.95rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .cadre-card {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+
+    .cadre-header {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .reason-box {
+      margin-top: 6px;
+      display: none;
+    }
+
+    .required-hint {
+      font-size: 0.8rem;
+      color: #d32f2f;
+    }
+
+    .button-row {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button[type="submit"] {
+      background: #1976d2;
+      color: white;
+    }
+
+    .message {
+      margin-top: 14px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>214 班級幹部工作表現評量表</h1>
+  <div class="description">
+    請依照你對班級幹部的觀察，為每一位幹部給予評分。<br>
+    若給 <strong>1 分（最低）或 5 分（最高）</strong>，必須寫出原因說明。
+  </div>
+
+  <form id="evaluationForm" novalidate>
+    <!-- 基本資料 -->
+    <div class="section-title">一、基本資料</div>
+    <div class="field-row">
+      <div class="field">
+        <label for="className">班級 <span class="required-hint">*</span></label>
+        <input type="text" id="className" name="className" placeholder="例如：214" required>
+      </div>
+      <div class="field">
+        <label for="seatNo">座號 <span class="required-hint">*</span></label>
+        <input type="text" id="seatNo" name="seatNo" placeholder="例如：05" required>
+      </div>
+      <div class="field">
+        <label for="studentName">姓名 <span class="required-hint">*</span></label>
+        <input type="text" id="studentName" name="studentName" placeholder="請輸入姓名" required>
+      </div>
+    </div>
+
+    <!-- 幹部評分區 -->
+    <div class="section-title">二、幹部工作表現評分</div>
+    <div id="cadresContainer">
+      <!-- JavaScript 會自動產生每位幹部的評分區塊 -->
+    </div>
+
+    <div class="button-row">
+      <button type="submit">送出本次評分</button>
+    </div>
+
+    <div id="messageBox" class="message"></div>
+  </form>
+
+  <script>
+    /***** 需要先貼上你的 Apps Script Web App URL *****/
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDABoba7PopsJGOloKdAjs7QK8d75qlmw6SGPWZ__iAfTWQWgT02pFYVfhD8Mm9xLu/exec'; // ← 改成你的網址
+
+    // 幹部名單（要與後端 CADRES 順序完全一致）
+    const CADRES = [
+      { title: '班長', name: '林泓廷' },
+      { title: '副班長', name: '吳律錡' },
+      { title: '風紀股長', name: '葉益華' },
+      { title: '副風紀股長', name: '歐奕廷' },
+      { title: '衛生股長', name: '胡晏瑋' },
+      { title: '副衛生股長', name: '鄭若姍' },
+      { title: '學藝股長', name: '曾鈴惠' },
+      { title: '副學藝股長', name: '吳瑋庭' },
+      { title: '總務股長', name: '王昱仁' },
+      { title: '環保股長', name: '廖家鴻' },
+      { title: '體育股長', name: '周延叡' },
+      { title: '公物、圖書、資訊股長', name: '蕭雅蕙' },
+      { title: '輔導股長', name: '劉于安' },
+      { title: '合作教育股長', name: '蔡米傑' }
+    ];
+
+    // 需要強制填寫原因的分數：1 分 & 5 分
+    const NEED_REASON_LEVELS = ['1', '5'];
+
+    const MIN_SCORE = 1;
+    const MAX_SCORE = 5;
+
+    const cadresContainer = document.getElementById('cadresContainer');
+    const form = document.getElementById('evaluationForm');
+    const messageBox = document.getElementById('messageBox');
+
+    // 動態產生幹部評分區塊
+    function createCadreFields() {
+      CADRES.forEach((cadre, index) => {
+        const card = document.createElement('div');
+        card.className = 'cadre-card';
+
+        const cadreId = 'cadre_' + index;
+
+        card.innerHTML = `
+          <div class="cadre-header">${cadre.title}：${cadre.name}</div>
+          <div class="field-row">
+            <div class="field">
+              <label for="${cadreId}_score">
+                評分 (${MIN_SCORE}～${MAX_SCORE}) <span class="required-hint">*</span>
+              </label>
+              <select id="${cadreId}_score" name="${cadreId}_score" required>
+                <option value="">--請選擇--</option>
+                ${Array.from({ length: MAX_SCORE - MIN_SCORE + 1 }, (_, i) => {
+                  const score = MIN_SCORE + i;
+                  return `<option value="${score}">${score}</option>`;
+                }).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="reason-box" id="${cadreId}_reasonBox">
+            <label for="${cadreId}_reason">
+              請說明為何給此分數
+              <span class="required-hint">(給 1 分或 5 分時必須填寫)</span>
+            </label>
+            <textarea id="${cadreId}_reason" name="${cadreId}_reason"></textarea>
+          </div>
+        `;
+
+        cadresContainer.appendChild(card);
+
+        // 控制原因欄位顯示 / 隱藏
+        const scoreSelect = card.querySelector(`#${cadreId}_score`);
+        const reasonBox = card.querySelector(`#${cadreId}_reasonBox`);
+        const reasonTextarea = card.querySelector(`#${cadreId}_reason`);
+
+        scoreSelect.addEventListener('change', () => {
+          const value = scoreSelect.value;
+          if (NEED_REASON_LEVELS.includes(value)) {
+            reasonBox.style.display = 'block';
+            reasonTextarea.required = true;
+          } else {
+            reasonBox.style.display = 'none';
+            reasonTextarea.required = false;
+            reasonTextarea.value = '';
+          }
+        });
+      });
+    }
+
+    createCadreFields();
+
+    // 顯示訊息
+    function showMessage(text, type = 'success') {
+      messageBox.textContent = text;
+      messageBox.className = 'message ' + type;
+      messageBox.style.display = 'block';
+    }
+
+    // 送出表單：把資料 POST 到 Apps Script
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      // HTML5 驗證
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const className = document.getElementById('className').value.trim();
+      const seatNo = document.getElementById('seatNo').value.trim();
+      const studentName = document.getElementById('studentName').value.trim();
+
+      const params = new URLSearchParams();
+      params.append('className', className);
+      params.append('seatNo', seatNo);
+      params.append('studentName', studentName);
+
+      CADRES.forEach((cadre, index) => {
+        const score = document.getElementById(`cadre_${index}_score`).value;
+        const reason = document.getElementById(`cadre_${index}_reason`).value.trim();
+        params.append(`cadre_${index}_score`, score);
+        params.append(`cadre_${index}_reason`, reason);
+      });
+
+      // 使用 no-cors 避免 CORS 問題（無法讀回應內容，但可以發送成功）
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      })
+      .then(() => {
+        showMessage('已成功送出本次評分，感謝你的填寫！', 'success');
+        form.reset();
+
+        // 重設原因欄位顯示狀態
+        CADRES.forEach((_, index) => {
+          const reasonBox = document.getElementById(`cadre_${index}_reasonBox`);
+          const reasonTextarea = document.getElementById(`cadre_${index}_reason`);
+          reasonBox.style.display = 'none';
+          reasonTextarea.required = false;
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        showMessage('送出時發生錯誤，請稍後再試或告訴老師。', 'error');
+      });
+    });
+  </script>
+</body>
+</html>
