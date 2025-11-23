@@ -87,6 +87,7 @@
     .cadre-header {
       font-weight: bold;
       margin-bottom: 6px;
+      font-size: 1.2rem;
     }
 
     .reason-box {
@@ -148,19 +149,18 @@
 <body>
   <h1>214 班級幹部工作表現評量表</h1>
   <div class="description">
-    請依照你對班級幹部的觀察，為每一位幹部給予評分。<br>
-    若給 <strong>1 分（最低）或 5 分（最高）</strong>，必須寫出原因說明。
+    請各位同學依據各級幹部到目前為止的『工作表現』，例如工作態度和認真程度等給予評價，好的評價是給幹部們鼓勵和加油的回饋，須要再加強的建議是可讓幹部成長和蛻變的動力，請各位同學能不吝給予回饋。所有資訊在轉知各幹部時皆會以匿名方式呈現。
+<br>
+   <span style="color:#d32f2f; font-weight:bold;">
+若給 1 分（最低）或 5 分（最高），必須寫出原因說明。
+</span>
   </div>
 
   <form id="evaluationForm" novalidate>
     <!-- 基本資料 -->
     <div class="section-title">一、基本資料</div>
     <div class="field-row">
-      <div class="field">
-        <label for="className">班級 <span class="required-hint">*</span></label>
-        <input type="text" id="className" name="className" placeholder="例如：214" required>
-      </div>
-      <div class="field">
+        <div class="field">
         <label for="seatNo">座號 <span class="required-hint">*</span></label>
         <input type="text" id="seatNo" name="seatNo" placeholder="例如：05" required>
       </div>
@@ -288,12 +288,10 @@
         return;
       }
 
-      const className = document.getElementById('className').value.trim();
       const seatNo = document.getElementById('seatNo').value.trim();
       const studentName = document.getElementById('studentName').value.trim();
 
       const params = new URLSearchParams();
-      params.append('className', className);
       params.append('seatNo', seatNo);
       params.append('studentName', studentName);
 
@@ -333,3 +331,4 @@
   </script>
 </body>
 </html>
+
