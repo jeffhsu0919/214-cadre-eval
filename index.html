@@ -176,6 +176,15 @@
       <!-- JavaScript 會自動產生每位幹部的評分區塊 -->
     </div>
 
+    <!-- 給班級的建議 / 問題反映 -->
+    <div class="section-title">三、給班級的建議與回饋（選填）</div>
+    <div class="field-row">
+      <div class="field">
+        <label for="classFeedback">如果你想給這個班級一些建議、想反映的問題，都可以寫在這裡：</label>
+        <textarea id="classFeedback" name="classFeedback" placeholder="這裡是選填欄位，你可以寫下對班級的建議、希望改進的地方。"></textarea>
+      </div>
+    </div>
+    
     <div class="button-row">
       <button type="submit">送出本次評分</button>
     </div>
@@ -290,11 +299,13 @@
 
       const seatNo = document.getElementById('seatNo').value.trim();
       const studentName = document.getElementById('studentName').value.trim();
-
+      const classFeedback = document.getElementById('classFeedback').value.trim();
+      
       const params = new URLSearchParams();
       params.append('seatNo', seatNo);
       params.append('studentName', studentName);
-
+      params.append('classFeedback', classFeedback); 
+      
       CADRES.forEach((cadre, index) => {
         const score = document.getElementById(`cadre_${index}_score`).value;
         const reason = document.getElementById(`cadre_${index}_reason`).value.trim();
@@ -312,6 +323,7 @@
         body: params.toString()
       })
       .then(() => {
+        alert('你的評分結果已送出');
         showMessage('已成功送出本次評分，感謝你的填寫！', 'success');
         form.reset();
 
@@ -331,4 +343,5 @@
   </script>
 </body>
 </html>
+
 
